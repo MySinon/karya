@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Karya — My Sinon 📚</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Orbitron:wght@500;900&family=Yuji+Syuku&display=swap" rel="stylesheet" />
+
+<style>
+/* =========================================================
+   RESET & VARIABLES
+   ========================================================= */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --sakura: #e8d8ff;
+  --pink: #ec4899;
+  --purple: #7c3aed;
+  --maroon: #8b1e2d;
+  --gold: #d4af37;
+  --cyan: #06b6d4;
+  --green: #4ade80;
+  --bg-1: #120a1f;
+  --text: #f5edff;
+  --text-dim: #b8a8d0;
+  --gradient-warm: linear-gradient(135deg, #e8d8ff, #ec4899, #8b1e2d);
+  --card-border: rgba(139, 30, 45, 0.35);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: var(--bg-1);
+  color: var(--text);
+  overflow-x: hidden;
+  min-height: 100vh;
+  cursor: none;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =========================================================
+   BACKGROUND — LIGHT VERSION
+   (hapus hue-rotate + scale animation, pakai translate aja)
+   ========================================================= */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -10%;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(236, 72, 153, 0.18), transparent 45%),
+    radial-gradient(circle at 85% 30%, rgba(124, 58, 237, 0.16), transparent 45%),
+    radial-gradient(circle at 50% 90%, rgba(139, 30, 45, 0.12), transparent 50%);
+  z-index: -3;
+  transform: translateZ(0);
+  pointer-events: none;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(236, 72, 153, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(168, 85, 247, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  z-index: -2;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 30%, transparent 75%);
+  mask-image: radial-gradient(circle at 50% 50%, black 30%, transparent 75%);
+}
+
+#sakura {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  transform: translateZ(0);
+}
+
+.petal {
+  position: absolute;
+  top: -30px;
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle at 30% 30%, #ffd9e2, #ffb7c5);
+  border-radius: 50% 0 50% 0;
+  opacity: 0.7;
+  /* pakai translate3d biar GPU-accelerated */
+  animation: petalFall linear infinite;
+  will-change: transform;
+}
+@keyframes petalFall {
+  0%   { transform: translate3d(0, -30px, 0) rotate(0deg); opacity: 0; }
+  10%  { opacity: 0.7; }
+  90%  { opacity: 0.7; }
+  100% { transform: translate3d(var(--drift, 60px), 105vh, 0) rotate(720deg); opacity: 0; }
+}
+
+.jp-char {
+  position: absolute;
+  font-family: 'Yuji Syuku', serif;
+  font-size: 3rem;
+  color: rgba(236, 72, 153, 0.06);
+  font-weight: 700;
+  pointer-events: none;
+  user-select: none;
+  will-change: transform;
+}
+@keyframes jpFloat {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-5deg); opacity: 0.06; }
+  50%      { transform: translate3d(0, -30px, 0) rotate(5deg); opacity: 0.12; }
+}
+
+/* =========================================================
+   LOADER
+   ========================================================= */
+#loader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-1);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s, visibility 0.6s;
+}
+#loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.loader-sakura {
+  font-size: 4rem;
+  animation: spinPulse 1.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px var(--pink));
+}
+@keyframes spinPulse {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50%      { transform: scale(1.3) rotate(180deg); }
+}
+.loader-text {
+  margin-top: 24px;
+  font-family: 'Yuji Syuku', serif;
+  letter-spacing: 8px;
+  font-size: 1rem;
+  color: var(--sakura);
+  text-shadow: 0 0 12px var(--pink);
+  animation: pulse 1.5s ease infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+/* =========================================================
+   CURSOR
+   ========================================================= */
+.cursor-dot, .cursor-ring {
+  position: fixed;
+  pointer-events: none;
+  z-index: 10000;
+  border-radius: 50%;
+  top: 0; left: 0;
+  will-change: transform;
+}
+.cursor-dot {
+  width: 6px; height: 6px;
+  margin: -3px 0 0 -3px;
+  background: var(--sakura);
+  box-shadow: 0 0 10px var(--pink);
+}
+.cursor-ring {
+  width: 38px; height: 38px;
+  margin: -19px 0 0 -19px;
+  border: 1.5px solid var(--pink);
+  transition: width 0.25s, height 0.25s, margin 0.25s,
+              border-color 0.25s, background 0.25s;
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.6);
+}
+.cursor-ring.hover {
+  width: 60px; height: 60px;
+  margin: -30px 0 0 -30px;
+  background: rgba(236, 72, 153, 0.15);
+  border-color: var(--cyan);
+  box-shadow: 0 0 30px rgba(6, 182, 212, 0.7);
+}
+
+/* =========================================================
+   NAVBAR
+   ========================================================= */
+.navbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  padding: 18px 6vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: rgba(18, 10, 31, 0.6);
+  border-bottom: 1px solid rgba(236, 72, 153, 0.15);
+}
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--sakura);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 50px;
+  border: 1px solid rgba(236, 72, 153, 0.4);
+  background: rgba(236, 72, 153, 0.08);
+  transition: background 0.25s, box-shadow 0.25s, transform 0.25s;
+  cursor: none;
+}
+.back-btn:hover {
+  background: rgba(236, 72, 153, 0.2);
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.5);
+  transform: translateX(-3px);
+}
+.logo {
+  font-family: 'Yuji Syuku', serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: 3px;
+  color: var(--sakura);
+  text-shadow: 0 0 20px var(--pink);
+}
+.logo span {
+  background: var(--gradient-warm);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.nav-right { display: flex; align-items: center; gap: 1.5rem; }
+
+.music-btn {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(236, 72, 153, 0.5);
+  background: rgba(236, 72, 153, 0.1);
+  color: var(--sakura);
+  cursor: none;
+  display: grid;
+  place-items: center;
+  transition: background 0.25s, transform 0.25s, box-shadow 0.25s, border-color 0.25s, color 0.25s;
+}
+.music-btn:hover {
+  background: rgba(236, 72, 153, 0.25);
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.6);
+  transform: scale(1.1);
+}
+.music-btn.playing {
+  border-color: var(--gold);
+  color: var(--gold);
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.7);
+}
+.eq-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 16px;
+}
+.eq-bars span {
+  width: 3px;
+  background: currentColor;
+  border-radius: 2px;
+  animation: eq 0.9s ease-in-out infinite;
+}
+.eq-bars span:nth-child(1) { height: 60%; animation-delay: 0s; }
+.eq-bars span:nth-child(2) { height: 100%; animation-delay: 0.2s; }
+.eq-bars span:nth-child(3) { height: 70%; animation-delay: 0.4s; }
+.eq-bars span:nth-child(4) { height: 90%; animation-delay: 0.1s; }
+@keyframes eq {
+  0%, 100% { transform: scaleY(0.4); }
+  50%      { transform: scaleY(1); }
+}
+.music-btn:not(.playing) .eq-bars span { animation-play-state: paused; transform: scaleY(0.3); }
+
+/* =========================================================
+   HERO
+   ========================================================= */
+.hero-page {
+  padding: 110px 5vw 20px;
+  text-align: center;
+  position: relative;
+}
+.hero-page .jp {
+  color: var(--cyan);
+  font-family: 'Yuji Syuku', serif;
+  font-size: 1rem;
+  letter-spacing: 10px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  display: block;
+  text-shadow: 0 0 16px var(--cyan);
+  animation: fadeInUp 0.7s ease both;
+}
+.hero-page h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 900;
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 30px rgba(236, 72, 153, 0.4);
+  animation: fadeInUp 0.7s ease 0.15s both;
+}
+.hero-page h1 .gradient-text {
+  background: linear-gradient(135deg, #e8d8ff, #ec4899, #8b1e2d, #ec4899, #e8d8ff);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradientShift 6s ease infinite;
+}
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.hero-page p.desc {
+  color: var(--text-dim);
+  font-size: 1rem;
+  line-height: 1.75;
+  max-width: 560px;
+  margin: 0 auto;
+  animation: fadeInUp 0.7s ease 0.3s both;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translate3d(0, 30px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* =========================================================
+   BOOKSHELF
+   ========================================================= */
+.bookshelf {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 60px 5vw 80px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px;
+  perspective: 1400px;
+}
+
+.book-card {
+  position: relative;
+  cursor: none;
+  animation: bookReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.book-card:nth-child(1) { animation-delay: 0.4s; }
+.book-card:nth-child(2) { animation-delay: 0.6s; }
+
+@keyframes bookReveal {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 50px, 0) rotateY(-25deg) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotateY(0) scale(1);
+  }
+}
+
+/* BUKU */
+.book {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4.2;
+  border-radius: 6px 14px 14px 6px;
+  background: linear-gradient(135deg, #1f1533 0%, #2a1a45 100%);
+  border: 1px solid var(--card-border);
+  overflow: hidden;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+              border-color 0.4s, box-shadow 0.4s;
+  transform: translateZ(0);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.45),
+    inset 0 0 60px rgba(139, 30, 45, 0.12);
+}
+
+/* Punggung buku */
+.book::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 22px;
+  background: linear-gradient(90deg,
+    rgba(0, 0, 0, 0.6) 0%,
+    rgba(139, 30, 45, 0.6) 40%,
+    rgba(0, 0, 0, 0.4) 100%);
+  border-radius: 6px 0 0 6px;
+  z-index: 3;
+  box-shadow: inset -2px 0 6px rgba(0, 0, 0, 0.5);
+}
+.book::after {
+  content: '';
+  position: absolute;
+  left: 22px; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    rgba(236, 72, 153, 0.4) 50%,
+    transparent 100%);
+  z-index: 2;
+}
+
+.book-card:hover .book {
+  transform: translate3d(0, -10px, 0) rotateY(-5deg) rotateX(3deg) scale(1.02);
+  border-color: rgba(236, 72, 153, 0.7);
+  box-shadow:
+    0 25px 50px rgba(236, 72, 153, 0.3),
+    inset 0 0 60px rgba(139, 30, 45, 0.25);
+}
+
+/* Cover buku */
+.book-cover {
+  position: absolute;
+  inset: 0;
+  padding: 30px 24px 30px 42px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 1;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.book-cover.no-image {
+  background:
+    repeating-linear-gradient(45deg,
+      rgba(168, 85, 247, 0.06) 0 20px,
+      rgba(236, 72, 153, 0.06) 20px 40px),
+    linear-gradient(135deg, #1f1533 0%, #2a1a45 100%);
+}
+.book-cover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    rgba(15, 8, 25, 0.15) 0%,
+    rgba(15, 8, 25, 0.7) 60%,
+    rgba(15, 8, 25, 0.95) 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+.book-cover > * { position: relative; z-index: 1; }
+
+.book-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: rgba(236, 72, 153, 0.2);
+  border: 1px solid rgba(236, 72, 153, 0.5);
+  border-radius: 50px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--sakura);
+  text-transform: uppercase;
+  align-self: flex-start;
+  text-shadow: 0 0 10px rgba(236, 72, 153, 0.6);
+}
+
+/* Icon buku (emoji) — pakai text-shadow bukan drop-shadow */
+.book-icon {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 6rem;
+  text-shadow:
+    0 0 30px rgba(236, 72, 153, 0.7),
+    0 10px 20px rgba(0, 0, 0, 0.5);
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 1;
+  pointer-events: none;
+}
+.book-card:hover .book-icon {
+  transform: translate(-50%, -50%) scale(1.15) rotate(-6deg);
+}
+
+.book-footer {
+  align-self: flex-end;
+  width: 100%;
+  text-align: right;
+}
+.book-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.1rem, 2.2vw, 1.4rem);
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 6px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9),
+               0 0 20px rgba(236, 72, 153, 0.4);
+}
+.book-sub {
+  font-family: 'Yuji Syuku', serif;
+  font-size: 0.78rem;
+  color: var(--sakura);
+  letter-spacing: 3px;
+  opacity: 0.85;
+  text-shadow: 0 0 10px rgba(236, 72, 153, 0.6);
+}
+
+/* =========================================================
+   LOCK OVERLAY
+   ========================================================= */
+.lock-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 5, 20, 0.4);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  pointer-events: none;
+  transition: background 0.3s, backdrop-filter 0.3s;
+}
+.book-card:hover .lock-overlay {
+  background: rgba(10, 5, 20, 0.55);
+}
+
+.lock-icon-wrap {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.05));
+  border: 2px solid rgba(212, 175, 55, 0.6);
+  display: grid;
+  place-items: center;
+  font-size: 2.4rem;
+  margin-bottom: 16px;
+  box-shadow:
+    0 0 30px rgba(212, 175, 55, 0.5),
+    inset 0 0 20px rgba(212, 175, 55, 0.15);
+  animation: lockPulse 2.5s ease-in-out infinite;
+  position: relative;
+}
+.lock-icon-wrap::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  animation: lockRing 3.5s linear infinite;
+}
+@keyframes lockPulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.06); }
+}
+@keyframes lockRing {
+  to { transform: rotate(360deg); }
+}
+.lock-emoji {
+  filter: drop-shadow(0 0 12px var(--gold));
+  display: inline-block;
+}
+@keyframes lockShake {
+  0%, 88%, 100% { transform: rotate(0deg); }
+  92%           { transform: rotate(-10deg); }
+  96%           { transform: rotate(10deg); }
+}
+/* Ganti animasi shake jadi class baru biar lebih hemat */
+.lock-emoji {
+  animation: lockShake 4s ease-in-out infinite;
+}
+
+.lock-text {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: var(--gold);
+  text-shadow:
+    0 0 15px var(--gold),
+    0 0 30px rgba(212, 175, 55, 0.6);
+  margin-bottom: 6px;
+}
+.lock-sub {
+  font-size: 0.72rem;
+  color: var(--sakura);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  opacity: 0.8;
+  text-shadow: 0 0 10px rgba(236, 72, 153, 0.5);
+}
+
+.lock-sparkle {
+  position: absolute;
+  font-size: 1.2rem;
+  color: var(--gold);
+  pointer-events: none;
+  will-change: transform;
+}
+@keyframes sparkleFloat {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.4; }
+  50%      { transform: translate3d(0, -12px, 0) scale(1.3); opacity: 1; }
+}
+.lock-sparkle { animation: sparkleFloat 3s ease-in-out infinite; }
+.lock-sparkle:nth-child(1) { top: 15%; left: 20%; animation-delay: 0s; }
+.lock-sparkle:nth-child(2) { top: 25%; right: 18%; animation-delay: 1s; }
+.lock-sparkle:nth-child(3) { bottom: 30%; left: 25%; animation-delay: 2s; }
+
+/* =========================================================
+   PROGRESS BAR — pakai transform scaleX (GPU)
+   ========================================================= */
+.book-progress {
+  margin-top: 20px;
+  padding: 0 4px;
+}
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+.progress-header .label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.progress-header .pct {
+  color: var(--pink);
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(236, 72, 153, 0.5);
+}
+.progress-bar {
+  width: 100%;
+  height: 5px;
+  background: rgba(236, 72, 153, 0.1);
+  border-radius: 50px;
+  overflow: hidden;
+  position: relative;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--gradient-warm);
+  border-radius: 50px;
+  box-shadow: 0 0 12px rgba(236, 72, 153, 0.6);
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
+}
+
+/* =========================================================
+   INFO
+   ========================================================= */
+.book-info {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+  padding: 0 8px;
+}
+.book-info .status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 50px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.book-info .status-chip .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
+}
+@keyframes dotPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+.book-info .status-chip .dot { animation: dotPulse 2s ease-in-out infinite; }
+.book-info p {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  line-height: 1.65;
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+.footer {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  border-top: 1px solid rgba(236, 72, 153, 0.15);
+  margin-top: 40px;
+  letter-spacing: 1px;
+}
+.footer .jp {
+  font-family: 'Yuji Syuku', serif;
+  color: var(--sakura);
+  letter-spacing: 4px;
+  margin-bottom: 8px;
+}
+
+/* =========================================================
+   REDUCED MOTION (kalau user set di OS)
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 900px) {
+  .bookshelf { gap: 30px; }
+  .book-icon { font-size: 4.5rem; }
+}
+@media (max-width: 640px) {
+  body { cursor: auto; }
+  .cursor-dot, .cursor-ring { display: none; }
+  .navbar { padding: 14px 5vw; }
+  .logo { font-size: 1.2rem; }
+  .back-btn { font-size: 0.8rem; padding: 6px 12px; cursor: pointer; }
+  .music-btn { width: 38px; height: 38px; cursor: pointer; }
+  .hero-page { padding: 90px 5vw 10px; }
+  .bookshelf {
+    grid-template-columns: 1fr;
+    padding: 40px 5vw 60px;
+    gap: 36px;
+  }
+  .book-card { cursor: pointer; }
+  .book-icon { font-size: 4rem; }
+  .lock-icon-wrap { width: 70px; height: 70px; font-size: 2rem; }
+  .lock-text { font-size: 0.9rem; letter-spacing: 3px; }
+  .jp-char { font-size: 1.8rem; }
+  .petal { width: 10px; height: 10px; animation-duration: 20s !important; }
+  .book-title { font-size: 1.15rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-sakura">📚</div>
+  <p class="loader-text">読み込み中...</p>
+</div>
+
+<!-- CURSOR -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- SAKURA -->
+<div id="sakura"></div>
+
+<!-- ============ NAVBAR ============ -->
+<nav class="navbar">
+  <a href="https://my-sinon.my.id" class="back-btn">← Kembali</a>
+  <div class="nav-right">
+    <div class="logo">My<span>Sinon</span></div>
+    <button class="music-btn" id="musicBtn" title="Play / Pause BGM" aria-label="Toggle Music">
+      <span class="eq-bars">
+        <span></span><span></span><span></span><span></span>
+      </span>
+    </button>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero-page">
+  <span class="jp">作品 — コレクション</span>
+  <h1><span class="gradient-text">KARYA</span></h1>
+  <p class="desc">
+    Komik dan light novel yang aku tulis sendiri masih dalam tahap pengembangan.
+    Nantikan rilisnya ya :>
+  </p>
+</header>
+
+<!-- ============ BOOKSHELF ============ -->
+<main class="bookshelf" id="bookshelf"></main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <p class="jp">ありがとう ございます</p>
+  <p>© 2026 My Sinon — karya.my-sinon.my.id — Made with 💜</p>
+</footer>
+
+<script>
+/* =========================================================
+   DATA KARYA
+   ========================================================= */
+const WORKS = [
+  {
+    id: 'komik',
+    title: 'KOMIK',
+    sub: '漫画 — Manga',
+    icon: '🎨',
+    cat: 'Comic Series',
+    cover: null,
+    locked: true,
+    link: null,
+    progress: 1,
+    status: 'Dalam Pengerjaan',
+    desc: 'Seri komik orisinal yang sedang aku gambar dan tulis. Cerita, karakter, dan panel-panel dikerjakan manual bersama tim.',
+    jp: '準備中'
+  },
+  {
+    id: 'novel',
+    title: 'LIGHT NOVEL',
+    sub: 'ライトノベル',
+    icon: '📖',
+    cat: 'Light Novel',
+    cover: null,
+    locked: true,
+    link: null,
+    progress: 2,
+    status: 'Dalam Pengerjaan',
+    desc: 'Light novel dengan ilustrasi dan cerita panjang. Fokus ke karakter yang kuat dan plot twist yang nggak terduga.',
+    jp: '執筆中'
+  }
+];
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+const shelf = document.getElementById('bookshelf');
+
+function renderBooks() {
+  shelf.innerHTML = WORKS.map(w => {
+    const coverStyle = w.cover ? `background-image: url('${w.cover}');` : '';
+    const coverClass = w.cover ? '' : 'no-image';
+
+    const lockHTML = w.locked ? `
+      <div class="lock-overlay">
+        <span class="lock-sparkle">✦</span>
+        <span class="lock-sparkle">✦</span>
+        <span class="lock-sparkle">✦</span>
+        <div class="lock-icon-wrap">
+          <span class="lock-emoji">🔒</span>
+        </div>
+        <div class="lock-text">LOCKED</div>
+        <div class="lock-sub">${w.jp}</div>
+      </div>
+    ` : '';
+
+    return `
+      <div class="book-card" data-id="${w.id}" data-locked="${w.locked}" data-link="${w.link || ''}">
+        <div class="book">
+          <div class="book-cover ${coverClass}" style="${coverStyle}">
+            <span class="book-cat">${w.cat}</span>
+            <span class="book-icon">${w.icon}</span>
+            <div class="book-footer">
+              <div class="book-title">${w.title}</div>
+              <div class="book-sub">${w.sub}</div>
+            </div>
+          </div>
+          ${lockHTML}
+        </div>
+        <div class="book-progress">
+          <div class="progress-header">
+            <span class="label">Progress</span>
+            <span class="pct">${w.progress}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" data-progress="${w.progress}"></div>
+          </div>
+        </div>
+        <div class="book-info">
+          <div class="status-chip">
+            <span class="dot"></span>
+            ${w.status}
+          </div>
+          <p>${w.desc}</p>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Animate progress bars
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      document.querySelectorAll('.progress-fill').forEach(el => {
+        el.style.transform = `scaleX(${el.dataset.progress / 100})`;
+      });
+    }, 200);
+  });
+
+  // Click handler
+  document.querySelectorAll('.book-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const locked = card.dataset.locked === 'true';
+      const link = card.dataset.link;
+      const work = WORKS.find(w => w.id === card.dataset.id);
+
+      if (locked) {
+        showLockedToast(work.title);
+      } else if (link) {
+        window.location.href = link;
+      }
+    });
+  });
+}
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+function showLockedToast(title) {
+  const oldToast = document.querySelector('.locked-toast');
+  if (oldToast) oldToast.remove();
+
+  const toast = document.createElement('div');
+  toast.className = 'locked-toast';
+  toast.innerHTML = `
+    <span style="font-size:1.8rem;filter:drop-shadow(0 0 12px #d4af37);">🔒</span>
+    <div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:0.9rem;font-weight:700;letter-spacing:1px;color:#e8d8ff;margin-bottom:3px;">${title} masih terkunci</div>
+      <div style="font-size:0.75rem;color:#b8a8d0;letter-spacing:0.3px;">Segera hadir — tunggu tanggal rilisnya ya!</div>
+    </div>
+  `;
+  Object.assign(toast.style, {
+    position: 'fixed',
+    bottom: '30px',
+    left: '50%',
+    padding: '16px 24px',
+    background: 'linear-gradient(160deg, rgba(35, 20, 55, 0.98), rgba(20, 10, 35, 0.98))',
+    border: '2px solid rgba(212, 175, 55, 0.6)',
+    borderRadius: '14px',
+    boxShadow: '0 15px 40px rgba(0, 0, 0, 0.6), 0 0 40px rgba(212, 175, 55, 0.3)',
+    color: '#f5edff',
+    fontFamily: "'Poppins', sans-serif",
+    display: 'flex',
+    alignItems: 'center',
+    gap: '14px',
+    zIndex: '9999',
+    opacity: '0',
+    transform: 'translate(-50%, 100px)',
+    transition: 'opacity 0.4s, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+    maxWidth: '90vw',
+    pointerEvents: 'none',
+    backdropFilter: 'blur(10px)'
+  });
+
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translate(-50%, 0)';
+  });
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translate(-50%, 100px)';
+    setTimeout(() => toast.remove(), 400);
+  }, 2800);
+}
+
+/* =========================================================
+   LOADER
+   ========================================================= */
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('loader').classList.add('hidden'), 600);
+});
+
+/* =========================================================
+   CUSTOM CURSOR — optimized (pause saat idle)
+   ========================================================= */
+(function initCursor() {
+  const dot = document.getElementById('cursorDot');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  let idleTimer = null;
+  let isIdle = true;
+  let rafId = null;
+
+  function loop() {
+    if (isIdle) { rafId = null; return; }
+    rx += (mx - rx) * 0.15;
+    ry += (my - ry) * 0.15;
+    ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
+    rafId = requestAnimationFrame(loop);
+  }
+
+  document.addEventListener('mousemove', (e) => {
+    mx = e.clientX;
+    my = e.clientY;
+    dot.style.transform = `translate3d(${mx}px, ${my}px, 0)`;
+
+    if (isIdle) {
+      isIdle = false;
+      if (!rafId) rafId = requestAnimationFrame(loop);
+    }
+
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => { isIdle = true; }, 500);
+  }, { passive: true });
+
+  // Snap ring saat idle selesai
+  setTimeout(() => {
+    rx = mx; ry = my;
+    ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
+  }, 100);
+
+  document.querySelectorAll('a, button, .book-card').forEach(el => {
+    el.addEventListener('mouseenter', () => ring.classList.add('hover'));
+    el.addEventListener('mouseleave', () => ring.classList.remove('hover'));
+  });
+})();
+
+/* =========================================================
+   SAKURA PETALS + JP CHARS
+   ========================================================= */
+(function initSakura() {
+  const container = document.getElementById('sakura');
+  const isMobile = window.innerWidth < 768;
+  const petalCount = isMobile ? 10 : 18;
+  const jpCount = isMobile ? 3 : 6;
+
+  const frag = document.createDocumentFragment();
+
+  for (let i = 0; i < petalCount; i++) {
+    const petal = document.createElement('div');
+    petal.className = 'petal';
+    petal.style.left = Math.random() * 100 + 'vw';
+    petal.style.animationDuration = (12 + Math.random() * 8) + 's';
+    petal.style.animationDelay = Math.random() * 12 + 's';
+    petal.style.setProperty('--drift', (Math.random() * 120 - 40) + 'px');
+    if (Math.random() > 0.5) {
+      petal.style.background = 'radial-gradient(circle at 30% 30%, #e0d0ff, #a855f7)';
+    }
+    frag.appendChild(petal);
+  }
+
+  const jpChars = ['小', '説', '漫', '画', '夢', '物', '語', '創', '作', '心'];
+  for (let i = 0; i < jpCount; i++) {
+    const el = document.createElement('div');
+    el.className = 'jp-char';
+    el.textContent = jpChars[Math.floor(Math.random() * jpChars.length)];
+    el.style.left = Math.random() * 90 + 'vw';
+    el.style.top = Math.random() * 90 + 'vh';
+    el.style.animationDelay = Math.random() * 10 + 's';
+    el.style.animationDuration = (15 + Math.random() * 10) + 's';
+    el.style.animation = `jpFloat ${15 + Math.random() * 10}s ease-in-out ${Math.random() * 10}s infinite`;
+    frag.appendChild(el);
+  }
+
+  container.appendChild(frag);
+})();
+
+/* =========================================================
+   🎵 MUSIC — LOFI CHILL (jazz chord + slow melody)
+   Progress: Am7 → Dm7 → G7 → Cmaj7 (very smooth jazz)
+   Tempo: 85 BPM, softer envelope, more reverb
+   ========================================================= */
+(function initMusic() {
+  const btn = document.getElementById('musicBtn');
+  let ctx = null;
+  let masterGain = null;
+  let delayNode = null;
+  let delayFeedback = null;
+  let delayWet = null;
+  let isPlaying = false;
+  let loopTimer = null;
+
+  // Frequencies yang dibutuhkan
+  const N = {
+    // Bass notes
+    'A2': 110.00, 'D3': 146.83, 'G2': 98.00, 'C3': 130.81,
+    // Chord notes
+    'A3': 220.00, 'C4': 261.63, 'E4': 329.63, 'G4': 392.00,
+    'D4': 293.66, 'F4': 349.23, 'A4': 440.00, 'C5': 523.25,
+    'G3': 196.00, 'B3': 246.94, 'B4': 493.88,
+    'E5': 659.25, 'D5': 587.33, 'G5': 783.99
+  };
+
+  // Jazz progression: Am7 → Dm7 → G7 → Cmaj7
+  const CHORDS = [
+    { notes: ['A3', 'C4', 'E4', 'G4'], bass: 'A2' },  // Am7
+    { notes: ['D4', 'F4', 'A4', 'C5'], bass: 'D3' },  // Dm7
+    { notes: ['G3', 'B3', 'D4', 'F4'], bass: 'G2' },  // G7
+    { notes: ['C4', 'E4', 'G4', 'B4'], bass: 'C3' },  // Cmaj7
+  ];
+
+  // Melody lembut — 8 notes, 1 per second (ambient feel)
+  // C major pentatonic-ish, descending pattern
+  const MELODY = [
+    'E5', 'D5', 'C5', 'E5',
+    'G5', 'E5', 'D5', 'C5'
+  ];
+
+  const BEAT = 1.0;          // detik per beat (60 BPM — santai)
+  const BAR_DUR = 8;         // 4 chord × 2 detik
+
+  /* Envelope lembut */
+  function playNote(freq, startTime, duration, type, vol) {
+    if (!freq) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+
+    // Soft attack + long release (chill feel)
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(vol, startTime + 0.15);
+    gain.gain.setValueAtTime(vol, startTime + duration * 0.3);
+    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+    osc.connect(gain);
+    gain.connect(masterGain);
+
+    // Feed ke reverb (delay) untuk note tinggi
+    if (freq > 300 && delayNode) {
+      const sendGain = ctx.createGain();
+      sendGain.gain.value = 0.5;
+      gain.connect(sendGain);
+      sendGain.connect(delayNode);
+    }
+
+    osc.start(startTime);
+    osc.stop(startTime + duration + 0.1);
+  }
+
+  function scheduleBar(startTime) {
+    // ===== CHORD PAD (soft, 4 notes per chord, arpeggiated) =====
+    CHORDS.forEach((chord, ci) => {
+      const cs = startTime + ci * 2;
+
+      chord.notes.forEach((n, ni) => {
+        // Sustained sine pad — sangat lembut
+        playNote(N[n], cs + ni * 0.12, 2.2, 'sine', 0.06);
+      });
+
+      // Bass yang dalam
+      playNote(N[chord.bass], cs, 2.0, 'sine', 0.15);
+    });
+
+    // ===== MELODY (pentatonic, santai) =====
+    MELODY.forEach((n, i) => {
+      const t = startTime + i * BEAT;
+      // Triangle wave untuk melodi — hangat & soft
+      playNote(N[n], t, 0.9, 'triangle', 0.08);
+      // Echo lembut 1 oktaf atas
+      playNote(N[n] * 1.5, t + 0.3, 0.5, 'sine', 0.02);
+    });
+  }
+
+  function loop() {
+    if (!isPlaying) return;
+    const now = ctx.currentTime + 0.1;
+    scheduleBar(now);
+    loopTimer = setTimeout(loop, BAR_DUR * 1000 - 100);
+  }
+
+  function initAudio() {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+    masterGain = ctx.createGain();
+    masterGain.gain.value = 0.5;   // lebih pelan dari sebelumnya (0.6)
+    masterGain.connect(ctx.destination);
+
+    // Reverb ala ambient (delay + feedback, delayTime panjang)
+    delayNode = ctx.createDelay(2);
+    delayNode.delayTime.value = 0.6;
+    delayFeedback = ctx.createGain();
+    delayFeedback.gain.value = 0.45;
+    delayWet = ctx.createGain();
+    delayWet.gain.value = 0.3;
+
+    // Low-pass filter untuk delay biar suara echo lembut
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 1800;
+
+    delayNode.connect(filter);
+    filter.connect(delayFeedback);
+    delayFeedback.connect(delayNode);
+    filter.connect(delayWet);
+    delayWet.connect(masterGain);
+  }
+
+  function startMusic() {
+    if (!ctx) initAudio();
+    if (ctx.state === 'suspended') ctx.resume();
+    isPlaying = true;
+    btn.classList.add('playing');
+    loop();
+  }
+
+  function stopMusic() {
+    isPlaying = false;
+    btn.classList.remove('playing');
+    clearTimeout(loopTimer);
+    if (masterGain) {
+      const now = ctx.currentTime;
+      masterGain.gain.cancelScheduledValues(now);
+      masterGain.gain.setValueAtTime(masterGain.gain.value, now);
+      masterGain.gain.linearRampToValueAtTime(0.0001, now + 0.5);
+      setTimeout(() => {
+        if (!isPlaying && masterGain) masterGain.gain.value = 0.5;
+      }, 600);
+    }
+  }
+
+  btn.addEventListener('click', () => {
+    if (isPlaying) stopMusic();
+    else startMusic();
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && ctx && isPlaying && ctx.state === 'suspended') {
+      ctx.resume();
+    }
+  });
+})();
+
+/* =========================================================
+   INIT
+   ========================================================= */
+renderBooks();
+</script>
+</body>
+</html>
